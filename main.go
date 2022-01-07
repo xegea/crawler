@@ -42,6 +42,8 @@ func main() {
 	rh := rejson.NewReJSONHandler()
 	rh.SetRedigoClient(conn)
 
+	log.Println(os.Getenv("PORT"))
+
 	scraper.ProcessGenres(109012)
 	scraper.ExecuteProcess(rh, 0)
 	//scraper.Whats_on_netflix()
