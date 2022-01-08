@@ -74,7 +74,7 @@ type Content struct {
 	Description   string
 	Genre         string
 	Image         string
-	DateCreated   int64
+	ReleaseDate   int64
 	Director      []string
 	Actors        []string
 	Trailer       []Trailer
@@ -88,9 +88,12 @@ type Trailer struct {
 }
 
 const genresFile string = "streaming/netflixgenres.txt"
-const genresUrl string = "https://www.netflix.com/es-es/browse/genre/"
 
-func ExecuteProcess(rh *rejson.Handler, initialGenre int) {
+var genresUrl string
+
+func ExecuteProcess(rh *rejson.Handler, initialGenre int, country string) {
+
+	genresUrl = resolveGenresUrl(country)
 
 	for _, v := range getGenres() {
 
@@ -149,6 +152,30 @@ func ProcessGenres(genresMax int) {
 	}
 }
 
+func resolveGenresUrl(country string) string {
+
+	switch country {
+	case "ES":
+		{
+			return "https://www.netflix.com/es/browse/genre/"
+		}
+	case "US":
+		{
+			return "https://www.netflix.com/es-US/browse/genre/"
+		}
+	case "GB":
+		{
+			return "https://www.netflix.com/en-GB/browse/genre/"
+		}
+	case "DE":
+		{
+			return "https://www.netflix.com/de-DE/browse/genre/"
+		}
+	}
+
+	return ""
+}
+
 func getGenres() []string {
 	b, err := ioutil.ReadFile(genresFile)
 	if err != nil {
@@ -166,7 +193,7 @@ func buildContent(nc *NetflixContent, rh *rejson.Handler) {
 		redisKey := buildRedisKey(v.Item.URL)
 		redisValue, err := rh.JSONGet(redisKey, ".")
 		if err != nil {
-			log.Fatalf("Failed to JSONGet %s", redisKey)
+			log.Printf("Failed to JSONGet %s", redisKey)
 		}
 		if redisValue != nil {
 			//fmt.Printf("%s --> found\n", v.Item.URL)
@@ -175,12 +202,14 @@ func buildContent(nc *NetflixContent, rh *rejson.Handler) {
 
 		b, err := httpGet(v.Item.URL)
 		if err != nil {
-			log.Fatalf("Failed to http get %s", v.Item.URL)
+			log.Printf("Failed to http get %s", v.Item.URL)
+			continue
 		}
 
 		var detail *NetflixContentDetail
 		if err := json.Unmarshal(extractJson(b), &detail); err != nil {
-			log.Fatalf("Failed to Unmarshall %s", v.Item.URL)
+			log.Printf("Failed to Unmarshall %s", v.Item.URL)
+			continue
 		}
 
 		var content Content
@@ -191,7 +220,7 @@ func buildContent(nc *NetflixContent, rh *rejson.Handler) {
 		content.Description = detail.Description
 		content.Genre = detail.Genre
 		content.Image = detail.Image
-		content.DateCreated = parseDate(detail.DateCreated)
+		content.ReleaseDate = parseDate(detail.DateCreated)
 
 		for _, dir := range detail.Actors {
 			content.Actors = append(content.Actors, dir.Name)
@@ -212,7 +241,8 @@ func buildContent(nc *NetflixContent, rh *rejson.Handler) {
 
 		_, err = rh.JSONSet(redisKey, ".", content)
 		if err != nil {
-			log.Fatalf("Failed to JSONSet %s", redisKey)
+			log.Printf("Failed to JSONSet %s", redisKey)
+			continue
 		}
 
 		fmt.Printf("%d: %s --> %s\n", i, content.Url, content.Title)
@@ -290,5 +320,15 @@ func parseDate(date string) int64 {
 }
 
 func buildRedisKey(contentUrl string) string {
-	return strings.Replace(strings.Replace(strings.Replace(contentUrl, "https://www.", "", 1), ".com/es/title/", ":", 1), ".com/es-es/title/", ":", 1)
+
+	var redisKey string
+	redisKey = strings.Replace(contentUrl, "https://www.netflix.com", "hbo", 1)
+	redisKey = strings.Replace(redisKey, "/es/title/", ":es-es:", 1)
+	redisKey = strings.Replace(redisKey, "/es-es/title/", ":es-es:", 1)
+	redisKey = strings.Replace(redisKey, "/en-us/title/", ":en-us:", 1)
+	redisKey = strings.Replace(redisKey, "/title/", ":en-us:", 1)
+	redisKey = strings.Replace(redisKey, "/de-de/title/", ":de-de:", 1)
+	redisKey = strings.Replace(redisKey, "/de/title/", ":de-de:", 1)
+
+	return redisKey
 }

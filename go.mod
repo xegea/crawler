@@ -11,7 +11,6 @@ require (
 
 require (
 	github.com/gomodule/redigo v1.8.6
-	github.com/gorilla/mux v1.8.0
 	github.com/joho/godotenv v1.4.0
 	github.com/nitishm/go-rejson v2.0.0+incompatible
 )
