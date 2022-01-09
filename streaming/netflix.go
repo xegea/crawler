@@ -82,15 +82,15 @@ func ExecuteNetflixProcess(rh *rejson.Handler, initialGenre int, country string)
 
 		b, err := httpGet(genresUrl + fmt.Sprint(v))
 		if err != nil {
-			log.Fatalf("Failed to http get %s", genresUrl+fmt.Sprint(v))
+			log.Printf("Failed to http get %s", genresUrl+fmt.Sprint(v))
 		}
 
 		var netflixContent *NetflixContent
 		if err := json.Unmarshal(extractJson(b), &netflixContent); err != nil {
-			log.Fatalf("Failed to Unmarshall %s", genresUrl+fmt.Sprint(v))
+			log.Printf("Failed to Unmarshall %s", genresUrl+fmt.Sprint(v))
 		}
 
-		buildNetflixContent(netflixContent, rh)
+		buildNetflixContent(netflixContent, rh, country)
 	}
 }
 
@@ -128,7 +128,7 @@ func ProcessNetflixGenres(genresMax int, country string) {
 	}
 }
 
-func buildNetflixContent(nc *NetflixContent, rh *rejson.Handler) {
+func buildNetflixContent(nc *NetflixContent, rh *rejson.Handler, country string) {
 
 	for i, v := range nc.ItemListElement {
 
@@ -155,17 +155,19 @@ func buildNetflixContent(nc *NetflixContent, rh *rejson.Handler) {
 		}
 
 		var movie Movie
-		movie.Title = detail.Name
+		movie.Title = make(map[string]string)
+		movie.Title[country] = detail.Name
 		movie.Url = detail.URL
 		movie.ContentRating = detail.ContentRating
 		movie.Type = detail.Type
-		movie.Description = detail.Description
+		movie.Description = make(map[string]string)
+		movie.Description[country] = detail.Description
 		movie.Genre = detail.Genre
 		movie.Image = detail.Image
 		movie.ReleaseDate = parseDate(detail.DateCreated)
 
-		for _, dir := range detail.Actors {
-			movie.Actors = append(movie.Actors, dir.Name)
+		for _, act := range detail.Actors {
+			movie.Actors = append(movie.Actors, act.Name)
 		}
 
 		for _, dir := range detail.Director {
@@ -175,8 +177,10 @@ func buildNetflixContent(nc *NetflixContent, rh *rejson.Handler) {
 		for _, tr := range detail.Trailer {
 			var trailer Trailer
 			trailer.Url = tr.ContentURL
-			trailer.Name = tr.Name
-			trailer.Description = tr.Description
+			trailer.Name = make(map[string]string)
+			trailer.Name[country] = tr.Name
+			trailer.Description = make(map[string]string)
+			trailer.Description[country] = tr.Description
 			trailer.ThumbnailUrl = tr.ThumbnailURL
 			movie.Trailer = append(movie.Trailer, trailer)
 		}

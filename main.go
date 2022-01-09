@@ -37,9 +37,9 @@ func main() {
 	rh := rejson.NewReJSONHandler()
 	rh.SetRedigoClient(conn)
 
-	// scraper.ProcessNetflixGenres(109012, country)
-	// scraper.ExecuteNetflixProcess(rh, 0, country)
+	//scraper.ProcessNetflixGenres(109012, country)
+	scraper.ExecuteNetflixProcess(rh, 0, country)
 
-	scraper.ExecuteHboProcess(rh, country)
+	//scraper.ExecuteHboProcess(rh, country)
 	//scraper.Whats_on_netflix()
 }

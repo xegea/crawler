@@ -1,11 +1,11 @@
 package scraper
 
 type Movie struct {
-	Title         string
+	Title         map[string]string
 	Url           string
 	ContentRating string
 	Type          string
-	Description   string
+	Description   map[string]string
 	Genre         string
 	Image         string
 	ReleaseDate   int64
@@ -15,8 +15,8 @@ type Movie struct {
 }
 
 type Trailer struct {
-	Name         string
-	Description  string
+	Name         map[string]string
+	Description  map[string]string
 	Url          string
 	ThumbnailUrl string
 }

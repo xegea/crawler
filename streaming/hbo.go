@@ -44,10 +44,10 @@ func ExecuteHboProcess(rh *rejson.Handler, country string) {
 		}
 	}
 
-	buildHboContent(urlList, rh)
+	buildHboContent(urlList, rh, country)
 }
 
-func buildHboContent(urlList []string, rh *rejson.Handler) {
+func buildHboContent(urlList []string, rh *rejson.Handler, country string) {
 	for i, url := range urlList {
 
 		redisKey := buildHboRedisKey(url)
@@ -62,7 +62,7 @@ func buildHboContent(urlList []string, rh *rejson.Handler) {
 
 		b, err := httpGet(url)
 		if err != nil {
-			log.Fatalf("Failed to http get %s", url)
+			log.Printf("Failed to http get %s", url)
 		}
 
 		var detail *HboContentDetail
@@ -72,11 +72,11 @@ func buildHboContent(urlList []string, rh *rejson.Handler) {
 		}
 
 		var movie Movie
-		movie.Title = detail.Name
+		movie.Title[country] = detail.Name
 		movie.Url = detail.URL
 		movie.ContentRating = strings.Join(detail.ContentRating, ",")
 		movie.Type = detail.Type
-		movie.Description = detail.Description
+		movie.Description[country] = detail.Description
 		movie.Genre = strings.Join(detail.Genre, ",")
 		movie.Image = detail.Image
 		// movie.ReleaseDate = parseDate(detail.DateCreated)
