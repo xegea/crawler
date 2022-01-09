@@ -206,15 +206,15 @@ func resolveGenresUrl(country string) string {
 		}
 	case "US":
 		{
-			return "https://www.netflix.com/es-US/browse/genre/"
+			return "https://www.netflix.com/browse/genre/"
 		}
 	case "GB":
 		{
-			return "https://www.netflix.com/en-GB/browse/genre/"
+			return "https://www.netflix.com/en-gb/browse/genre/"
 		}
 	case "DE":
 		{
-			return "https://www.netflix.com/de-DE/browse/genre/"
+			return "https://www.netflix.com/de-de/browse/genre/"
 		}
 	}
 
@@ -238,9 +238,9 @@ func buildNetflixRedisKey(movieUrl string) string {
 	redisKey = strings.Replace(redisKey, "/es/title/", ":es-es:", 1)
 	redisKey = strings.Replace(redisKey, "/es-es/title/", ":es-es:", 1)
 	redisKey = strings.Replace(redisKey, "/en-us/title/", ":en-us:", 1)
-	redisKey = strings.Replace(redisKey, "/title/", ":en-us:", 1)
 	redisKey = strings.Replace(redisKey, "/de-de/title/", ":de-de:", 1)
 	redisKey = strings.Replace(redisKey, "/de/title/", ":de-de:", 1)
+	redisKey = strings.Replace(redisKey, "/title/", ":en-us:", 1)
 
 	return redisKey
 }
