@@ -191,7 +191,7 @@ func buildNetflixContent(nc *NetflixContent, rh *rejson.Handler, country string)
 			continue
 		}
 
-		fmt.Printf("%d: %s --> %s\n", i, movie.Url, movie.Title)
+		fmt.Printf("%d: %s --> %s\n", i, movie.Url, movie.Title[country])
 
 		time.Sleep(3 * time.Second)
 	}
