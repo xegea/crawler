@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -64,8 +65,6 @@ type NetflixContentDetail struct {
 	StartDate       string `json:"startDate"`
 }
 
-const genresFile string = "streaming/netflixgenres.txt"
-
 func ExecuteNetflixProcess(rh *rejson.Handler, initialGenre int, country string) {
 
 	genresUrl := resolveGenresUrl(country)
@@ -120,7 +119,7 @@ func ProcessNetflixGenres(genresMax int, country string) {
 		defer resp.Body.Close()
 
 		if resp.StatusCode >= 200 && resp.StatusCode <= 299 {
-			appendToFile(genresFile, fmt.Sprint(i))
+			appendToFile(os.Getenv("GENRESFILE"), fmt.Sprint(i))
 			fmt.Print("*")
 		}
 
@@ -222,6 +221,9 @@ func resolveGenresUrl(country string) string {
 }
 
 func getGenres() []string {
+
+	genresFile := os.Getenv("GENRESFILE")
+
 	b, err := ioutil.ReadFile(genresFile)
 	if err != nil {
 		log.Fatalf("Failed to read %s", genresFile)
