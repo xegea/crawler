@@ -17,9 +17,15 @@ func main() {
 
 	log.Println("Init process")
 
-	err := godotenv.Load(".env")
+	path, err := os.Getwd()
 	if err != nil {
-		log.Printf("Error loading .env file")
+		log.Println("Error getting current path ", err)
+	}
+	path = path + "/.env"
+
+	err = godotenv.Load(path)
+	if err != nil {
+		log.Printf("Error loading %s file", path)
 	}
 
 	host := os.Getenv("REDIS_HOST")
