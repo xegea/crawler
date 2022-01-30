@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"log"
 	"os"
 
@@ -17,15 +18,12 @@ func main() {
 
 	log.Println("Init process")
 
-	path, err := os.Getwd()
-	if err != nil {
-		log.Println("Error getting current path ", err)
-	}
-	path = path + "/.env"
+	envPath := flag.String("env", ".env", ".env path")
+	flag.Parse()
 
-	err = godotenv.Load(path)
+	err := godotenv.Load(*envPath)
 	if err != nil {
-		log.Printf("Error loading %s file", path)
+		log.Printf("Error loading %s file", *envPath)
 	}
 
 	host := os.Getenv("REDIS_HOST")
