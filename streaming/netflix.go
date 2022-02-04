@@ -132,6 +132,7 @@ func buildNetflixContent(nc *NetflixContent, rh *rejson.Handler, country string)
 	for i, v := range nc.ItemListElement {
 
 		redisKey := buildNetflixRedisKey(v.Item.URL)
+
 		redisValue, err := rh.JSONGet(redisKey, ".")
 		if err != nil {
 			log.Printf("Failed to JSONGet %s", redisKey)
@@ -243,6 +244,10 @@ func buildNetflixRedisKey(movieUrl string) string {
 	redisKey = strings.Replace(redisKey, "/de-de/title/", ":de-de:", 1)
 	redisKey = strings.Replace(redisKey, "/de/title/", ":de-de:", 1)
 	redisKey = strings.Replace(redisKey, "/title/", ":en-us:", 1)
+
+	if strings.Contains(redisKey, "es-en") {
+		log.Fatalf("Incorrect key in %s", redisKey)
+	}
 
 	return redisKey
 }

@@ -16,7 +16,7 @@ var conn redis.Conn
 
 func main() {
 
-	logFile, err := os.OpenFile("error.log", os.O_CREATE|os.O_RDWR|os.O_APPEND, 0660)
+	logFile, err := os.OpenFile("current.log", os.O_CREATE|os.O_RDWR|os.O_APPEND, 0660)
 	if err != nil {
 		panic(err)
 	}
