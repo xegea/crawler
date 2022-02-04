@@ -16,12 +16,19 @@ var conn redis.Conn
 
 func main() {
 
+	logFile, err := os.OpenFile("error.log", os.O_CREATE|os.O_RDWR|os.O_APPEND, 0660)
+	if err != nil {
+		panic(err)
+	}
+	defer logFile.Close()
+	log.SetOutput(logFile)
+
 	log.Println("Init process")
 
 	envPath := flag.String("env", ".env", ".env path")
 	flag.Parse()
 
-	err := godotenv.Load(*envPath)
+	err = godotenv.Load(*envPath)
 	if err != nil {
 		log.Printf("Error loading %s file", *envPath)
 	}
