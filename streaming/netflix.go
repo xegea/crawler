@@ -230,7 +230,7 @@ func getGenres() []string {
 		log.Fatalf("Failed to read %s", genresFile)
 	}
 
-	genres := strings.Split(string(b), "\n")
+	genres := strings.Split(string(b), ",")
 	return genres
 }
 
