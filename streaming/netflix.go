@@ -250,5 +250,9 @@ func buildNetflixRedisKey(movieUrl string) string {
 		log.Fatalf("Incorrect key in %s", redisKey)
 	}
 
+	if strings.Contains(redisKey, "de-en") {
+		log.Fatalf("Incorrect key in %s", redisKey)
+	}
+
 	return redisKey
 }
