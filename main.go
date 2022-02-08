@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"log"
 	"os"
 
@@ -23,7 +24,7 @@ func main() {
 	defer logFile.Close()
 	log.SetOutput(logFile)
 
-	log.Println("Init process")
+	fmt.Println("Init process")
 
 	envPath := flag.String("env", ".env", ".env path")
 	flag.Parse()
@@ -53,4 +54,6 @@ func main() {
 
 	//scraper.ExecuteHboProcess(rh, country)
 	//scraper.Whats_on_netflix()
+
+	fmt.Println("End process")
 }
