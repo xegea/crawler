@@ -87,6 +87,7 @@ func ExecuteNetflixProcess(rh *rejson.Handler, initialGenre int, country string)
 		var netflixContent *NetflixContent
 		if err := json.Unmarshal(extractJson(b), &netflixContent); err != nil {
 			log.Printf("Failed to Unmarshall %s", genresUrl+fmt.Sprint(v))
+			continue
 		}
 
 		buildNetflixContent(netflixContent, rh, country)
