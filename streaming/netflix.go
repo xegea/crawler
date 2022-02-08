@@ -147,13 +147,13 @@ func buildNetflixContent(nc *NetflixContent, rh *rejson.Handler, country string)
 
 		b, err := httpGet(v.Item.URL)
 		if err != nil {
-			fmt.Printf("Failed to http get %s", v.Item.URL)
+			fmt.Printf("Failed to http get %s\n", v.Item.URL)
 			continue
 		}
 
 		var detail *NetflixContentDetail
 		if err := json.Unmarshal(extractJson(b), &detail); err != nil {
-			fmt.Printf("Failed to Unmarshall %s", v.Item.URL)
+			fmt.Printf("Failed to Unmarshall %s\n", v.Item.URL)
 			continue
 		}
 
@@ -190,7 +190,7 @@ func buildNetflixContent(nc *NetflixContent, rh *rejson.Handler, country string)
 
 		_, err = rh.JSONSet(redisKey, ".", movie)
 		if err != nil {
-			fmt.Printf("Failed to JSONSet %s", redisKey)
+			fmt.Printf("Failed to JSONSet %s\n", redisKey)
 			continue
 		}
 
