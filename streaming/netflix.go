@@ -81,12 +81,13 @@ func ExecuteNetflixProcess(rh *rejson.Handler, initialGenre int, country string)
 
 		b, err := httpGet(genresUrl + fmt.Sprint(v))
 		if err != nil {
-			log.Printf("Failed to http get %s", genresUrl+fmt.Sprint(v))
+			fmt.Printf("Failed to http get %s\n", genresUrl+fmt.Sprint(v))
+			continue
 		}
 
 		var netflixContent *NetflixContent
 		if err := json.Unmarshal(extractJson(b), &netflixContent); err != nil {
-			log.Printf("Failed to Unmarshall %s", genresUrl+fmt.Sprint(v))
+			fmt.Printf("Failed to Unmarshall %s\n", genresUrl+fmt.Sprint(v))
 			continue
 		}
 
@@ -136,22 +137,23 @@ func buildNetflixContent(nc *NetflixContent, rh *rejson.Handler, country string)
 
 		redisValue, err := rh.JSONGet(redisKey, ".")
 		if err != nil {
-			log.Printf("Failed to JSONGet %s", redisKey)
+			fmt.Printf("Failed to JSONGet %s\n", redisKey)
+			continue
 		}
 		if redisValue != nil {
-			//fmt.Printf("%s --> found\n", v.Item.URL)
+			fmt.Printf("%s --> found\n", v.Item.URL)
 			continue
 		}
 
 		b, err := httpGet(v.Item.URL)
 		if err != nil {
-			log.Printf("Failed to http get %s", v.Item.URL)
+			fmt.Printf("Failed to http get %s", v.Item.URL)
 			continue
 		}
 
 		var detail *NetflixContentDetail
 		if err := json.Unmarshal(extractJson(b), &detail); err != nil {
-			log.Printf("Failed to Unmarshall %s", v.Item.URL)
+			fmt.Printf("Failed to Unmarshall %s", v.Item.URL)
 			continue
 		}
 
@@ -188,7 +190,7 @@ func buildNetflixContent(nc *NetflixContent, rh *rejson.Handler, country string)
 
 		_, err = rh.JSONSet(redisKey, ".", movie)
 		if err != nil {
-			log.Printf("Failed to JSONSet %s", redisKey)
+			fmt.Printf("Failed to JSONSet %s", redisKey)
 			continue
 		}
 
@@ -228,7 +230,7 @@ func getGenres() []string {
 
 	b, err := ioutil.ReadFile(genresFile)
 	if err != nil {
-		log.Printf("Failed to read %s", genresFile)
+		fmt.Printf("Failed to read %s\n", genresFile)
 	}
 
 	genres := strings.Split(string(b), ",")
