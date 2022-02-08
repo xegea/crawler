@@ -227,7 +227,7 @@ func getGenres() []string {
 
 	b, err := ioutil.ReadFile(genresFile)
 	if err != nil {
-		log.Fatalf("Failed to read %s", genresFile)
+		log.Printf("Failed to read %s", genresFile)
 	}
 
 	genres := strings.Split(string(b), ",")
@@ -247,11 +247,11 @@ func buildNetflixRedisKey(movieUrl string) string {
 	redisKey = strings.Replace(redisKey, "/title/", ":en-us:", 1)
 
 	if strings.Contains(redisKey, "es-en") {
-		log.Fatalf("Incorrect key in %s", redisKey)
+		log.Fatalf("Incorrect key %s", redisKey)
 	}
 
 	if strings.Contains(redisKey, "de-en") {
-		log.Fatalf("Incorrect key in %s", redisKey)
+		log.Fatalf("Incorrect key %s", redisKey)
 	}
 
 	return redisKey
