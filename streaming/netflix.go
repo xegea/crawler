@@ -133,8 +133,6 @@ func buildNetflixContent(nc *NetflixContent, rh *rejson.Handler, country string)
 
 	for i, v := range nc.ItemListElement {
 
-		time.Sleep(3 * time.Second)
-
 		redisKey := buildNetflixRedisKey(v.Item.URL)
 
 		redisValue, err := rh.JSONGet(redisKey, ".")
@@ -150,12 +148,14 @@ func buildNetflixContent(nc *NetflixContent, rh *rejson.Handler, country string)
 		b, err := httpGet(v.Item.URL)
 		if err != nil {
 			fmt.Printf("Failed to http get %s - error: %s\n", v.Item.URL, err)
+			time.Sleep(3 * time.Second)
 			continue
 		}
 
 		var detail *NetflixContentDetail
 		if err := json.Unmarshal(extractJson(b), &detail); err != nil {
 			fmt.Printf("Failed to Unmarshall %s\n", v.Item.URL)
+			time.Sleep(3 * time.Second)
 			continue
 		}
 
@@ -197,6 +197,8 @@ func buildNetflixContent(nc *NetflixContent, rh *rejson.Handler, country string)
 		}
 
 		fmt.Printf("%d: %s --> %s\n", i, movie.Url, movie.Title[country])
+
+		time.Sleep(3 * time.Second)
 	}
 }
 
