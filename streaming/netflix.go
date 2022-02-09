@@ -133,6 +133,8 @@ func buildNetflixContent(nc *NetflixContent, rh *rejson.Handler, country string)
 
 	for i, v := range nc.ItemListElement {
 
+		time.Sleep(3 * time.Second)
+
 		redisKey := buildNetflixRedisKey(v.Item.URL)
 
 		redisValue, err := rh.JSONGet(redisKey, ".")
@@ -195,8 +197,6 @@ func buildNetflixContent(nc *NetflixContent, rh *rejson.Handler, country string)
 		}
 
 		fmt.Printf("%d: %s --> %s\n", i, movie.Url, movie.Title[country])
-
-		time.Sleep(3 * time.Second)
 	}
 }
 
