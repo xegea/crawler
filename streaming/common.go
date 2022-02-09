@@ -24,6 +24,7 @@ func httpGet(url string) ([]byte, error) {
 
 	resp, err := client.Do(req)
 	if err != nil {
+		fmt.Printf("Error: %s - Status Code: %d", err, resp.StatusCode)
 		return nil, err
 	}
 	defer resp.Body.Close()
