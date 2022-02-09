@@ -147,7 +147,7 @@ func buildNetflixContent(nc *NetflixContent, rh *rejson.Handler, country string)
 
 		b, err := httpGet(v.Item.URL)
 		if err != nil {
-			fmt.Printf("Failed to http get %s\n", v.Item.URL)
+			fmt.Printf("Failed to http get %s - error: %s\n", v.Item.URL, err)
 			continue
 		}
 
