@@ -24,8 +24,6 @@ func main() {
 	defer logFile.Close()
 	log.SetOutput(logFile)
 
-	fmt.Println("Init process")
-
 	envPath := flag.String("env", ".env", ".env path")
 	flag.Parse()
 
@@ -38,6 +36,12 @@ func main() {
 	password := os.Getenv("REDIS_PASSWORD")
 	country := os.Getenv("COUNTRY")
 
+	useRedis := false
+	useRedisEnv := os.Getenv("USE_REDIS")
+	if useRedisEnv == "TRUE" {
+		useRedis = true
+	}
+
 	conn, err = redis.Dial("tcp", host,
 		redis.DialPassword(password),
 	)
@@ -49,8 +53,10 @@ func main() {
 	rh := rejson.NewReJSONHandler()
 	rh.SetRedigoClient(conn)
 
+	fmt.Println("Init process")
+
 	//scraper.ProcessNetflixGenres(109012, country)
-	scraper.ExecuteNetflixProcess(rh, 0, country)
+	scraper.ExecuteNetflixProcess(rh, 0, country, useRedis)
 
 	//scraper.ExecuteHboProcess(rh, country)
 	//scraper.Whats_on_netflix()

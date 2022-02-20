@@ -1,6 +1,7 @@
 package scraper
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -65,7 +66,7 @@ type NetflixContentDetail struct {
 	StartDate       string `json:"startDate"`
 }
 
-func ExecuteNetflixProcess(rh *rejson.Handler, initialGenre int, country string) {
+func ExecuteNetflixProcess(rh *rejson.Handler, initialGenre int, country string, useRedis bool) {
 
 	genresUrl := resolveGenresUrl(country)
 
@@ -91,7 +92,7 @@ func ExecuteNetflixProcess(rh *rejson.Handler, initialGenre int, country string)
 			continue
 		}
 
-		buildNetflixContent(netflixContent, rh, country)
+		buildNetflixContent(netflixContent, rh, country, useRedis)
 	}
 }
 
@@ -129,20 +130,31 @@ func ProcessNetflixGenres(genresMax int, country string) {
 	}
 }
 
-func buildNetflixContent(nc *NetflixContent, rh *rejson.Handler, country string) {
+func buildNetflixContent(nc *NetflixContent, rh *rejson.Handler, country string, useRedis bool) {
 
 	for i, v := range nc.ItemListElement {
 
 		redisKey := buildNetflixRedisKey(v.Item.URL)
 
-		redisValue, err := rh.JSONGet(redisKey, ".")
-		if err != nil {
-			fmt.Printf("Failed to JSONGet %s\n", redisKey)
-			continue
-		}
-		if redisValue != nil {
-			fmt.Printf("%s --> found\n", v.Item.URL)
-			continue
+		if useRedis {
+			value, err := rh.JSONGet(redisKey, ".")
+			if err != nil {
+				fmt.Printf("Failed to JSONGet %s\n", redisKey)
+				continue
+			}
+			if value != nil {
+				fmt.Printf("%s --> found\n", v.Item.URL)
+				continue
+			}
+		} else {
+			value, err := httpGet("http://87.106.124.190/movie/" + redisKey)
+			if err != nil {
+				fmt.Printf("Failed to http get %s - error: %s\n", "http://87.106.124.190/movie/"+redisKey, err)
+			}
+			if value != nil {
+				//fmt.Printf("%s --> found\n", v.Item.URL)
+				continue
+			}
 		}
 
 		b, err := httpGet(v.Item.URL)
@@ -189,10 +201,24 @@ func buildNetflixContent(nc *NetflixContent, rh *rejson.Handler, country string)
 			movie.Trailer = append(movie.Trailer, trailer)
 		}
 
-		_, err = rh.JSONSet(redisKey, ".", movie)
-		if err != nil {
-			fmt.Printf("Failed to JSONSet %s\n", redisKey)
-			continue
+		if useRedis {
+			_, err = rh.JSONSet(redisKey, ".", movie)
+			if err != nil {
+				fmt.Printf("Failed to JSONSet %s\n", redisKey)
+				continue
+			}
+		} else {
+			json_data, err := json.Marshal(movie)
+			if err != nil {
+				fmt.Printf("Failed to Marshall movie")
+				continue
+			}
+
+			_, err = http.Post("http://87.106.124.190/movie", "application/json", bytes.NewBuffer(json_data))
+			if err != nil {
+				fmt.Printf("Failed to http post %s\n", redisKey)
+				continue
+			}
 		}
 
 		fmt.Printf("%d: %s --> %s\n", i, movie.Url, movie.Title[country])
