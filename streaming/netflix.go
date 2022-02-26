@@ -108,7 +108,7 @@ func ProcessNetflixGenres(genresMax int, country string) {
 
 	for i := initialGenre + 1; i <= genresMax; i++ {
 
-		req, err := http.NewRequest("GET", genresUrl+fmt.Sprint(i), nil)
+		req, _ := http.NewRequest("GET", genresUrl+fmt.Sprint(i), nil)
 		client := http.Client{}
 
 		client.CheckRedirect = func(req *http.Request, via []*http.Request) error {
@@ -180,7 +180,7 @@ func buildNetflixContent(nc *NetflixContent, rh *rejson.Handler, country string,
 		movie.Description[country] = detail.Description
 		movie.Genre = detail.Genre
 		movie.Image = detail.Image
-		movie.ReleaseDate = parseDate(detail.DateCreated)
+		movie.ReleaseDate = unixTimestamp(detail.DateCreated)
 
 		for _, act := range detail.Actors {
 			movie.Actors = append(movie.Actors, act.Name)

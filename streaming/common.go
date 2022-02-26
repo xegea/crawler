@@ -56,7 +56,7 @@ func extractJson(b []byte) []byte {
 	return json
 }
 
-func parseDate(date string) int64 {
+func unixTimestamp(date string) int64 {
 
 	var year, day int
 	var month time.Month
