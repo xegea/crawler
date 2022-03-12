@@ -9,10 +9,11 @@ import (
 )
 
 type Config struct {
-	Env     string
-	Country string
-	ApiUrl  string
-	ApiKey  string
+	Env         string
+	Country     string
+	ApiUrl      string
+	ApiKey      string
+	ProcessMode string
 }
 
 func LoadConfig(env *string) (Config, error) {
@@ -39,10 +40,13 @@ func LoadConfig(env *string) (Config, error) {
 		return Config{}, fmt.Errorf("API_KEY cannot be empty")
 	}
 
+	processMode := os.Getenv("PROCESS_MODE")
+
 	return Config{
-		Env:     environment,
-		Country: country,
-		ApiUrl:  apiUrl,
-		ApiKey:  apiKey,
+		Env:         environment,
+		Country:     country,
+		ApiUrl:      apiUrl,
+		ApiKey:      apiKey,
+		ProcessMode: processMode,
 	}, nil
 }

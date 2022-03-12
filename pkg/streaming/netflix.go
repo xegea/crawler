@@ -109,13 +109,15 @@ func buildNetflixContent(nc *NetflixContent, config config.Config) {
 
 		key := buildNetflixRedisKey(v.Item.URL)
 
-		value, err := httpGet(config.ApiUrl+"/movie/"+key, config.ApiKey)
-		if err != nil {
-			fmt.Printf("Failed to http get %s - error: %s\n", config.ApiUrl+"/movie/"+key, err)
-		}
-		if value != nil {
-			//fmt.Printf("%s --> found\n", v.Item.URL)
-			continue
+		if config.ProcessMode == "NewOnly" {
+			value, err := httpGet(config.ApiUrl+"/movie/"+key, config.ApiKey)
+			if err != nil {
+				fmt.Printf("Failed to http get %s - error: %s\n", config.ApiUrl+"/movie/"+key, err)
+			}
+			if value != nil && err == nil {
+				//fmt.Printf("%s --> found\n", v.Item.URL)
+				continue
+			}
 		}
 
 		b, err := httpGet(v.Item.URL, config.ApiKey)

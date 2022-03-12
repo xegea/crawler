@@ -13,7 +13,6 @@ import (
 
 func httpGet(url string, apiKey string) ([]byte, error) {
 
-	client := &http.Client{}
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return nil, err
@@ -24,6 +23,7 @@ func httpGet(url string, apiKey string) ([]byte, error) {
 		"ApiKey":       []string{apiKey},
 	}
 
+	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
 		fmt.Printf("Error Url: %s - Status Code: %d", req.URL, resp.StatusCode)
@@ -45,7 +45,6 @@ func httpGet(url string, apiKey string) ([]byte, error) {
 
 func httpPost(url string, body *bytes.Buffer, apiKey string) error {
 
-	client := &http.Client{}
 	req, err := http.NewRequest("POST", url, body)
 	if err != nil {
 		return err
@@ -56,6 +55,7 @@ func httpPost(url string, body *bytes.Buffer, apiKey string) error {
 		"ApiKey":       []string{apiKey},
 	}
 
+	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
 		fmt.Printf("Error Url: %s - Status Code: %d", req.URL, resp.StatusCode)
