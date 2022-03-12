@@ -1,6 +1,7 @@
-package scraper
+package streaming
 
 import (
+	"bytes"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -10,7 +11,7 @@ import (
 	"time"
 )
 
-func httpGet(url string) ([]byte, error) {
+func httpGet(url string, apiKey string) ([]byte, error) {
 
 	client := &http.Client{}
 	req, err := http.NewRequest("GET", url, nil)
@@ -20,6 +21,7 @@ func httpGet(url string) ([]byte, error) {
 
 	req.Header = http.Header{
 		"Content-Type": []string{"application/json"},
+		"ApiKey":       []string{apiKey},
 	}
 
 	resp, err := client.Do(req)
@@ -39,6 +41,38 @@ func httpGet(url string) ([]byte, error) {
 	}
 
 	return b, nil
+}
+
+func httpPost(url string, body *bytes.Buffer, apiKey string) error {
+
+	client := &http.Client{}
+	req, err := http.NewRequest("POST", url, body)
+	if err != nil {
+		return err
+	}
+
+	req.Header = http.Header{
+		"Content-Type": []string{"application/json"},
+		"ApiKey":       []string{apiKey},
+	}
+
+	resp, err := client.Do(req)
+	if err != nil {
+		fmt.Printf("Error Url: %s - Status Code: %d", req.URL, resp.StatusCode)
+		return err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("post failed: %s", resp.Status)
+	}
+
+	_, err = ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func extractJson(b []byte) []byte {

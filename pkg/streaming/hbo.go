@@ -1,6 +1,7 @@
-package scraper
+package streaming
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -8,8 +9,12 @@ import (
 	"strings"
 	"time"
 
-	"github.com/nitishm/go-rejson"
+	"github.com/moviedb/scraper/pkg/config"
 )
+
+type Hbo struct {
+	Config config.Config
+}
 
 type HboContentDetail struct {
 	Context       string   `json:"@context"`
@@ -26,43 +31,47 @@ type HboContentDetail struct {
 	} `json:"actor"`
 }
 
-func ExecuteHboProcess(rh *rejson.Handler, country string) {
+func (h Hbo) ExecuteProcess() error {
 
+	config := h.Config
 	var urlList []string
 	for _, v := range []string{"movies", "series"} {
-		url := resolveContentUrl(v, country)
+		url := resolveContentUrl(v, config.Country)
 
-		b, err := httpGet(url)
+		b, err := httpGet(url, config.ApiKey)
 		if err != nil {
-			log.Fatalf("Failed to http get %s", url)
+			log.Printf("Failed to http get %s", url)
 		}
 
 		m := regexp.MustCompile(`urn:hbo:page:([A-Za-z0-9]+):type:`)
 		content := m.FindAllSubmatch(b, 10000)
 		for _, j := range content {
-			urlList = append(urlList, resolveDetailUrl(string(j[1]), country, v))
+			urlList = append(urlList, resolveDetailUrl(string(j[1]), h.Config.Country, v))
 		}
 	}
 
-	buildHboContent(urlList, rh, country)
+	buildHboContent(urlList, config)
+
+	return nil
 }
 
-func buildHboContent(urlList []string, rh *rejson.Handler, country string) {
+func buildHboContent(urlList []string, config config.Config) {
 	for i, url := range urlList {
 
-		redisKey := buildHboRedisKey(url)
-		redisValue, err := rh.JSONGet(redisKey, ".")
+		key := buildHboRedisKey(url)
+		value, err := httpGet(config.ApiUrl+"/movie/"+key, config.ApiKey)
 		if err != nil {
-			log.Printf("Failed to JSONGet %s", redisKey)
+			fmt.Printf("Failed to http get %s - error: %s\n", config.ApiUrl+"/movie/"+key, err)
 		}
-		if redisValue != nil {
+		if value != nil {
 			//fmt.Printf("%s --> found\n", v.Item.URL)
 			continue
 		}
 
-		b, err := httpGet(url)
+		b, err := httpGet(url, config.ApiKey)
 		if err != nil {
-			log.Printf("Failed to http get %s", url)
+			fmt.Printf("Failed to http get %s - error: %s\n", url, err)
+			continue
 		}
 
 		var detail *HboContentDetail
@@ -72,11 +81,11 @@ func buildHboContent(urlList []string, rh *rejson.Handler, country string) {
 		}
 
 		var movie Movie
-		movie.Title[country] = detail.Name
+		movie.Title = detail.Name
 		movie.Url = detail.URL
 		movie.ContentRating = strings.Join(detail.ContentRating, ",")
 		movie.Type = detail.Type
-		movie.Description[country] = detail.Description
+		movie.Description = detail.Description
 		movie.Genre = strings.Join(detail.Genre, ",")
 		movie.Image = detail.Image
 		// movie.ReleaseDate = parseDate(detail.DateCreated)
@@ -98,9 +107,15 @@ func buildHboContent(urlList []string, rh *rejson.Handler, country string) {
 		// 	movie.Trailer = append(movie.Trailer, trailer)
 		// }
 
-		_, err = rh.JSONSet(redisKey, ".", movie)
+		json_data, err := json.Marshal(movie)
 		if err != nil {
-			log.Printf("Failed to JSONSet %s", redisKey)
+			fmt.Printf("Failed to Marshall movie")
+			continue
+		}
+
+		err = httpPost(config.ApiUrl+"/movie/"+key, bytes.NewBuffer(json_data), config.ApiKey)
+		if err != nil {
+			fmt.Printf("Failed to http post %s\n", key)
 			continue
 		}
 

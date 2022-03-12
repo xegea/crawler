@@ -1,4 +1,4 @@
-package scraper
+package streaming
 
 import (
 	"encoding/json"
