@@ -4,9 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
-	"os"
 	"regexp"
 	"time"
 )
@@ -63,7 +61,7 @@ func httpPost(url string, body *bytes.Buffer, apiKey string) error {
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode != http.StatusOK {
+	if resp.StatusCode != http.StatusCreated {
 		return fmt.Errorf("post failed: %s", resp.Status)
 	}
 
@@ -98,16 +96,4 @@ func unixTimestamp(date string) int64 {
 	fmt.Sscanf(date, "%d-%d-%d", &year, &month, &day)
 
 	return time.Date(year, month, day, 0, 0, 0, 0, time.UTC).Unix()
-}
-
-func appendToFile(file string, s string) {
-	f, err := os.OpenFile(file, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-	if err != nil {
-		log.Println(err)
-	}
-	defer f.Close()
-
-	if _, err := f.WriteString(fmt.Sprintf("\n%s", s)); err != nil {
-		log.Println(err)
-	}
 }
